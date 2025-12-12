@@ -83,7 +83,7 @@ Based on urgency-related keywords (urgent, asap, immediately, critical, etc.):
 * *low*	    208,814
 * *high*	59,062
 
-## 05. Final Merged Dataset
+## 05. Merged Dataset
 
 The Enron and SpamAssassin datasets were merged into a unified dataset with the columns:
 
@@ -97,7 +97,95 @@ The Enron and SpamAssassin datasets were merged into a unified dataset with the 
 
 * Total combined emails: 513,806
 
-* This file will be used for model training in Milestone 2.
+## 06. Exploratory Data Analysis (EDA) and saving final cleaned and clipped dataset:
+
+### i. Email Length Distribution (Before and After Clipping):
+
+Email lengths were analyzed to detect anomalies.
+
+#### Before Clipping:
+
+* A few emails had lengths exceeding 1–2 million characters, caused by merged threads, HTML noise, or logs.
+
+* These extreme outliers distorted the distribution and required cleaning.
+
+#### After Clipping (<10,000 characters):
+
+* The distribution becomes realistic and right-skewed.
+
+* Most emails have lengths between 200–1500 characters, matching typical enterprise communications.
+
+* Removing outliers improved data quality and model stability.
+
+* This clipped dataset is saved and going to be used in second milestone.
+
+### ii. Email Category Distribution:
+
+This visualization shows how emails are distributed across different categories such as request, feedback, complaint, other, ham, and spam.
+
+#### Key Insights:
+
+* Request emails form the largest proportion of the dataset.
+
+* Other and feedback categories follow next.
+
+* Complaint, ham, and spam categories appear less frequently.
+
+* This class imbalance is expected in enterprise email systems and will be addressed during model training.
+
+### iii. Urgency Level Distribution
+
+Emails were automatically assigned urgency scores: high, medium, and low.
+
+#### Key Insights:
+
+* Most emails fall under medium urgency (~48%).
+
+* Low urgency messages (~41%) include general inquiries and feedback.
+
+* Only 10–12% of emails are high urgency, which aligns with real-world support scenarios where truly urgent emails are fewer.
+
+* This distribution helps prioritize responses for enterprise workflows.
+
+### iv. Category vs. Urgency Heatmap:
+
+This heatmap provides a deeper understanding of how urgency levels vary across different email categories.
+
+#### Key Insights:
+
+* Requests are mostly medium urgency, indicating they need timely action but are not emergencies.
+
+* Feedback and other emails are primarily low urgency.
+
+* Complaints show a mix of low and high urgency—depending on issue severity.
+
+* Spam correctly shows almost no urgency.
+
+* The relationship patterns validate the correctness of the labeling logic.
+
+### v. Wordcloud for Complaint Emails:
+
+A wordcloud was generated to visualize the most frequent terms in complaint emails.
+
+**Key Insights:**
+
+* Dominant words include: error, database, issue, attempting, initialize, operation, engine, and unknown.
+
+* This shows that most "complaint" emails relate to technical or system failures rather than customer-facing complaints.
+
+* The dataset reflects internal company operations (e.g., Enron tech issues).
+
+### Overall Observations:
+
+* The dataset displays natural class imbalance typical of enterprise systems.
+
+* Urgency levels align logically with email categories.
+
+* Email lengths required preprocessing to remove corrupted entries.
+
+* Text patterns in complaints reveal a strong presence of internal IT problems.
+
+* The cleaned dataset is high quality, consistent, and ready for model development in Milestone-2.
 
 # Author
 
