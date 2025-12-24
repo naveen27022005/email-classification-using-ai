@@ -1,0 +1,4 @@
+# Temporary / training artifacts
+temp/
+bert_results/
+models/bert_results/
