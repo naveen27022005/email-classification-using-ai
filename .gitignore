@@ -2,3 +2,16 @@
 temp/
 bert_results/
 models/bert_results/
+
+# Trained models
+models/
+*.safetensors
+*.bin
+*.pkl
+*.joblib
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
