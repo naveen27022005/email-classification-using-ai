@@ -187,6 +187,75 @@ A wordcloud was generated to visualize the most frequent terms in complaint emai
 
 * The cleaned dataset is high quality, consistent, and ready for model development in Milestone-2.
 
+---
+
+# Milestone 2: Email Categorization Engine
+
+## Objective
+The objective of Milestone 2 is to design and implement an NLP-based email categorization engine that automatically classifies enterprise emails into predefined categories such as **Complaint**, **Request**, **Feedback**, **Spam**, and **Other**. This milestone focuses on model development, training, and evaluation using machine learning and transformer-based approaches.
+
+
+## Approach
+
+To achieve robust email classification, multiple Natural Language Processing (NLP) techniques and models were explored.
+
+### 1. Text Preprocessing
+* This part has been already dealt in Milestone - 1
+
+### 2. Baseline Machine Learning Models
+The following baseline classifiers were implemented using Scikit-learn:
+
+- **Logistic Regression**
+- **Multinomial Naive Bayes**
+
+These models were trained using TF-IDF vectorized email text and served as a performance benchmark.
+
+### 3. Transformer-Based Model
+To improve semantic understanding and contextual accuracy, a transformer-based model was fine-tuned:
+
+- **DistilBERT**
+
+Key steps:
+- Tokenization using Hugging Face Transformers
+- Fine-tuning on labeled email categories
+- Training with class imbalance handling
+- Evaluation using standard classification metrics
+
+## Model Evaluation
+
+All models were evaluated using the following metrics:
+
+- **Precision**
+- **Recall**
+- **F1-Score**
+- **Accuracy**
+
+Evaluation was performed on a held-out test dataset to ensure generalization.
+
+### Observations
+- Baseline models provided strong performance with fast training times.
+- The transformer-based model demonstrated improved contextual understanding, especially for complex and ambiguous email content.
+- Class imbalance was handled using weighted loss functions and balanced training strategies.
+
+## Results Summary
+- Successful multi-class classification of enterprise emails
+- Improved categorization accuracy using transformer-based modeling
+- Reliable baseline performance using classical ML models
+
+Detailed evaluation metrics and classification reports are available in the respective notebooks.
+
+---
+
+## Note on Model Files
+
+Due to GitHub file size limitations, trained model artifacts (such as `.safetensors`, `.pkl`, and other large binaries) are **not included** in this repository.
+
+All models can be **re-generated** by executing the provided training notebooks in the `notebooks/` directory.
+
+This follows standard industry practices for machine learning projects and ensures repository portability.
+
+---
+
 # Author
 
 Naveen E, Infosys Springborad Intern
