@@ -246,11 +246,87 @@ Detailed evaluation metrics and classification reports are available in the resp
 
 ---
 
+# Milestone 3: Urgency Detection & Scoring
+
+## Objective
+The objective of Milestone 3 is to design and implement an **Urgency Detection Module** that automatically assigns priority levels (**High**, **Medium**, **Low**) to incoming enterprise emails. This ensures that critical issues are identified early and addressed promptly, improving operational efficiency and customer satisfaction.
+
+
+
+## Approach
+
+To accurately determine email urgency, a **hybrid approach** combining rule-based heuristics and machine learning techniques was adopted.
+
+
+
+### 1. Feature Identification
+Urgency-related signals were identified from email content, including:
+- Presence of keywords such as *urgent*, *asap*, *immediately*, *not working*, *critical*
+- Email length and tone
+- Contextual cues indicating deadlines or service outages
+
+
+
+### 2. Rule-Based Urgency Detection
+A lightweight rule-based system was implemented to quickly flag high-priority emails:
+- **High Urgency**: Emails containing strong urgency keywords or failure indicators
+- **Medium Urgency**: Emails requesting action without immediate pressure
+- **Low Urgency**: Informational or general feedback emails
+
+This approach ensures fast and interpretable urgency classification.
+
+
+
+### 3. Machine Learning-Based Urgency Classification
+In parallel, a supervised machine learning model was developed:
+- TF-IDF vectorization of email text
+- Multi-class classification for urgency levels (High / Medium / Low)
+- Handling class imbalance using weighted loss strategies
+
+The ML model complements the rule-based system by capturing subtle contextual urgency patterns.
+
+
+
+### 4. Hybrid Decision Strategy
+The final urgency score is determined by combining:
+- Rule-based urgency signals
+- Machine learning model predictions
+
+This hybrid strategy improves robustness and reduces misclassification of critical emails.
+
+
+
+## Model Evaluation
+
+Urgency detection performance was evaluated using:
+- **Precision**
+- **Recall**
+- **F1-Score**
+- **Confusion Matrix**
+
+Evaluation was performed on a held-out test dataset to ensure unbiased assessment.
+
+### Observations
+- Rule-based detection effectively captures explicit urgency indicators
+- ML-based classification improves accuracy for nuanced cases
+- The combined approach provides balanced and reliable urgency predictions
+
+
+
+## Results Summary
+- Successful classification of emails into **High**, **Medium**, and **Low** urgency levels
+- Improved prioritization of time-sensitive emails
+- Reliable integration with the email categorization output from Milestone 2
+
+Visualizations and evaluation results are available in the `visualization/` directory.
+
+---
+
 ## Note on Model Files
 
 Due to GitHub file size limitations, trained model artifacts (such as `.safetensors`, `.pkl`, and other large binaries) are **not included** in this repository.
 
-All models can be **re-generated** by executing the provided training notebooks in the `notebooks/` directory.
+All models can be **re-generated** by executing the provided training notebooks in the `Code/` directory.
 
 This follows standard industry practices for machine learning projects and ensures repository portability.
 
