@@ -2,16 +2,10 @@
 temp/
 bert_results/
 models/bert_results/
-
-# Trained models
-models/
-*.safetensors
-*.bin
-*.pkl
-*.joblib
+models/*/checkpoint-*
 
 # Notebook checkpoints
 .ipynb_checkpoints/
 
-# Python
+# Python cache
 __pycache__/
