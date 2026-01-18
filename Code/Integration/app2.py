@@ -20,7 +20,7 @@ st.set_page_config(
 # --------------------------------------------------
 # CONSTANTS
 # --------------------------------------------------
-CATEGORY_MODEL_HF = "naveen27022005/distilbert-email-category-classifier"
+CATEGORY_MODEL_HF = "naveen-27022005/distilbert-email-category-classifier"
 
 CATEGORY_LABELS = [
     "complaint",
@@ -31,8 +31,16 @@ CATEGORY_LABELS = [
     "spam"
 ]
 
-URGENCY_MODEL_PATH = "models/urgency/urgency_lr.pkl"
-URGENCY_VECTORIZER_PATH = "models/urgency/urgency_tfidf_vectorizer.pkl"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+
+URGENCY_MODEL_PATH = os.path.join(
+    PROJECT_ROOT, "models", "urgency", "urgency_lr.pkl"
+)
+
+URGENCY_VECTORIZER_PATH = os.path.join(
+    PROJECT_ROOT, "models", "urgency", "urgency_tfidf_vectorizer.pkl"
+)
 
 # --------------------------------------------------
 # LOAD URGENCY MODELS (LIGHTWEIGHT)
