@@ -22,7 +22,7 @@ st.write("Hybrid ML system with rule-based fallback")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 
-CATEGORY_MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "distilbert_classifier")
+CATEGORY_MODEL_PATH = "naveen-27022005/distilbert-email-category-classifier"
 URGENCY_MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "urgency", "urgency_lr.pkl")
 URGENCY_VECTORIZER_PATH = os.path.join(PROJECT_ROOT, "models", "urgency", "urgency_tfidf_vectorizer.pkl")
 
@@ -31,12 +31,8 @@ URGENCY_VECTORIZER_PATH = os.path.join(PROJECT_ROOT, "models", "urgency", "urgen
 # -------------------------------
 @st.cache_resource
 def load_category_model():
-    tokenizer = AutoTokenizer.from_pretrained(
-        CATEGORY_MODEL_PATH, local_files_only=True
-    )
-    model = AutoModelForSequenceClassification.from_pretrained(
-        CATEGORY_MODEL_PATH, local_files_only=True
-    )
+    tokenizer = AutoTokenizer.from_pretrained(CATEGORY_MODEL_PATH)
+    model = AutoModelForSequenceClassification.from_pretrained(CATEGORY_MODEL_PATH)
     model.eval()
     return tokenizer, model
 
