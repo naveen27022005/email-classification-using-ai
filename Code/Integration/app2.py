@@ -1,166 +1,141 @@
-import os
+import streamlit as st
 import joblib
 import torch
-import streamlit as st
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import numpy as np
+import re
+import os
 
-# -------------------------------
-# Streamlit Page Config
-# -------------------------------
+# --------------------------------------------------
+# GLOBAL SETTINGS (LOW MEMORY)
+# --------------------------------------------------
+torch.set_grad_enabled(False)
+
 st.set_page_config(
-    page_title="AI Smart Email Classifier",
+    page_title="AI Email Classifier",
     page_icon="📧",
     layout="centered"
 )
 
-st.title("📧 AI-Powered Smart Email Classifier")
-st.write("Hybrid ML system with rule-based fallback")
+# --------------------------------------------------
+# CONSTANTS
+# --------------------------------------------------
+CATEGORY_MODEL_HF = "naveen27022005/distilbert-email-category-classifier"
 
-# -------------------------------
-# Path Handling (ROBUST)
-# -------------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+CATEGORY_LABELS = [
+    "complaint",
+    "feedback",
+    "ham",
+    "other",
+    "request",
+    "spam"
+]
 
-CATEGORY_MODEL_PATH = "naveen-27022005/distilbert-email-category-classifier"
-URGENCY_MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "urgency", "urgency_lr.pkl")
-URGENCY_VECTORIZER_PATH = os.path.join(PROJECT_ROOT, "models", "urgency", "urgency_tfidf_vectorizer.pkl")
+URGENCY_MODEL_PATH = "models/urgency/urgency_lr.pkl"
+URGENCY_VECTORIZER_PATH = "models/urgency/urgency_tfidf_vectorizer.pkl"
 
-# -------------------------------
-# Load Models (Cached)
-# -------------------------------
+# --------------------------------------------------
+# LOAD URGENCY MODELS (LIGHTWEIGHT)
+# --------------------------------------------------
+@st.cache_resource
+def load_urgency_models():
+    lr_model = joblib.load(URGENCY_MODEL_PATH)
+    vectorizer = joblib.load(URGENCY_VECTORIZER_PATH)
+    return lr_model, vectorizer
+
+
+# --------------------------------------------------
+# LOAD CATEGORY MODEL (HEAVY – LAZY LOADED)
+# --------------------------------------------------
 @st.cache_resource
 def load_category_model():
-    tokenizer = AutoTokenizer.from_pretrained(CATEGORY_MODEL_PATH)
-    model = AutoModelForSequenceClassification.from_pretrained(CATEGORY_MODEL_PATH)
+    tokenizer = AutoTokenizer.from_pretrained(CATEGORY_MODEL_HF)
+    model = AutoModelForSequenceClassification.from_pretrained(CATEGORY_MODEL_HF)
     model.eval()
     return tokenizer, model
 
-@st.cache_resource
-def load_urgency_model():
-    vectorizer = joblib.load(URGENCY_VECTORIZER_PATH)
-    model = joblib.load(URGENCY_MODEL_PATH)
-    return vectorizer, model
 
-category_tokenizer, category_model = load_category_model()
-urgency_vectorizer, urgency_model = load_urgency_model()
+# --------------------------------------------------
+# RULE-BASED FALLBACK (CATEGORY)
+# --------------------------------------------------
+def rule_based_category(text):
+    text = text.lower()
 
-# -------------------------------
-# Label Maps
-# -------------------------------
-CATEGORY_LABELS = {
-    0: "complaint",
-    1: "feedback",
-    2: "other",
-    3: "request",
-    4: "spam"
-}
+    if any(word in text for word in ["refund", "not working", "issue", "problem", "error", "failed"]):
+        return "complaint"
+    if any(word in text for word in ["request", "please", "could you", "can you"]):
+        return "request"
+    if any(word in text for word in ["thank", "appreciate", "feedback"]):
+        return "feedback"
+    if any(word in text for word in ["buy now", "free", "click", "offer"]):
+        return "spam"
 
-URGENCY_LABELS = {0: "low", 1: "medium", 2: "high"}
-
-# -------------------------------
-# Rule-Based Logic
-# -------------------------------
-def rule_based_category(email_text, ml_label, confidence):
-    text = email_text.lower()
-
-    complaint_keywords = [
-        "not working", "system down", "failed", "error",
-        "issue", "problem", "crashed", "outage", "down"
-    ]
-
-    # Apply rule ONLY if confidence is low
-    if confidence < 0.70:
-        if any(k in text for k in complaint_keywords):
-            return "complaint", "Rule-based override"
-
-    return ml_label, "Model prediction"
+    return "other"
 
 
-def rule_based_urgency(email_text, ml_label, confidence):
-    text = email_text.lower()
-
-    high_urgency_keywords = [
-        "urgent", "asap", "immediately", "critical",
-        "right away", "priority", "emergency"
-    ]
-
-    if confidence < 0.70:
-        if any(k in text for k in high_urgency_keywords):
-            return "high", "Rule-based override"
-
-    return ml_label, "Model prediction"
-
-# -------------------------------
-# Prediction Functions
-# -------------------------------
-def predict_category(email_text):
-    inputs = category_tokenizer(
-        email_text, return_tensors="pt",
-        truncation=True, padding=True, max_length=256
-    )
-
-    with torch.no_grad():
-        outputs = category_model(**inputs)
-
-    probs = torch.softmax(outputs.logits, dim=1)
-    confidence, pred_class = torch.max(probs, dim=1)
-
-    label = CATEGORY_LABELS[pred_class.item()]
-    return label, confidence.item()
+# --------------------------------------------------
+# URGENCY PREDICTION
+# --------------------------------------------------
+def predict_urgency(text):
+    lr_model, vectorizer = load_urgency_models()
+    X = vectorizer.transform([text])
+    probs = lr_model.predict_proba(X)[0]
+    idx = np.argmax(probs)
+    labels = lr_model.classes_
+    return labels[idx], probs[idx]
 
 
-def predict_urgency(email_text):
-    X = urgency_vectorizer.transform([email_text])
-    pred = urgency_model.predict(X)[0]
-    confidence = urgency_model.predict_proba(X).max()
-    return pred, confidence
+# --------------------------------------------------
+# CATEGORY PREDICTION (DISTILBERT)
+# --------------------------------------------------
+def predict_category(text):
+    try:
+        tokenizer, model = load_category_model()
 
-# -------------------------------
-# UI
-# -------------------------------
+        inputs = tokenizer(
+            text,
+            return_tensors="pt",
+            truncation=True,
+            padding=True
+        )
+
+        with torch.no_grad():
+            outputs = model(**inputs)
+            probs = torch.softmax(outputs.logits, dim=1)
+
+        idx = torch.argmax(probs, dim=1).item()
+        return CATEGORY_LABELS[idx], probs[0][idx].item()
+
+    except Exception:
+        # Fallback if memory spikes
+        return rule_based_category(text), 0.50
+
+
+# --------------------------------------------------
+# STREAMLIT UI
+# --------------------------------------------------
+st.title("📧 AI Email Classifier")
+st.caption("Hybrid ML system with rule-based fallback")
+
 email_text = st.text_area(
-    "✉️ Enter Email Text",
+    "Enter email content",
     height=200,
-    placeholder="Example: Check for the DB errors asap."
+    placeholder="Paste the email text here..."
 )
 
 if st.button("🔍 Predict"):
     if not email_text.strip():
-        st.warning("Please enter an email.")
+        st.warning("Please enter email content.")
     else:
-        with st.spinner("Analyzing email..."):
-            # Category
-            cat_label, cat_conf = predict_category(email_text)
-            final_cat, cat_source = rule_based_category(
-                email_text, cat_label, cat_conf
-            )
+        # CATEGORY
+        with st.spinner("Classifying email category..."):
+            category, cat_conf = predict_category(email_text)
 
-            # Urgency
-            urg_label, urg_conf = predict_urgency(email_text)
-            final_urg, urg_source = rule_based_urgency(
-                email_text, urg_label, urg_conf
-            )
+        # URGENCY
+        urgency, urg_conf = predict_urgency(email_text)
 
-        st.success("Prediction Complete ✅")
-
-        st.markdown("### 📂 Email Category")
-        st.write(f"**{final_cat.capitalize()}**")
-        st.caption(f"Confidence: {cat_conf:.2f} | Source: {cat_source}")
-
-        st.markdown("### ⏱ Urgency Level")
-        st.write(f"**{final_urg.capitalize()}**")
-        st.caption(f"Confidence: {urg_conf:.2f} | Source: {urg_source}")
+        st.success(f"📂 **Category:** {category}  \nConfidence: {cat_conf:.2f}")
+        st.info(f"⚡ **Urgency:** {urgency}  \nConfidence: {urg_conf:.2f}")
 
         st.markdown("---")
-        st.markdown(
-            "**Hybrid Decision Logic:**  \n"
-            "- ML prediction used by default  \n"
-            "- Rule-based override applied only when confidence is low"
-        )
-
-# -------------------------------
-# Footer
-# -------------------------------
-st.markdown("---")
-st.caption("Milestone-4 | Hybrid ML + Rule-Based Streamlit Deployment")
+        st.caption("DistilBERT loaded lazily • Logistic Regression for urgency")
