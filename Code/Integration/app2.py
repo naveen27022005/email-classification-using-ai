@@ -10,10 +10,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 
 CATEGORY_MODEL_PATH = os.path.join(
-    PROJECT_ROOT, "models", "Email classification", "category_lr.pkl"
+    PROJECT_ROOT, "models", "email_classification", "category_lr.pkl"
 )
 CATEGORY_VECTORIZER_PATH = os.path.join(
-    PROJECT_ROOT, "models", "Email classification", "category_tfidf_vectorizer.pkl"
+    PROJECT_ROOT, "models", "email_classification", "category_tfidf_vectorizer.pkl"
 )
 
 URGENCY_MODEL_PATH = os.path.join(
