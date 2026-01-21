@@ -322,13 +322,179 @@ Visualizations and evaluation results are available in the `visualization/` dire
 
 ---
 
-## Note on Model Files
 
-Due to GitHub file size limitations, trained model artifacts (such as `.safetensors`, `.pkl`, and other large binaries) are **not included** in this repository.
+# Milestone 4: Deployment & Integration
 
-All models can be **re-generated** by executing the provided training notebooks in the `Code/` directory.
+## 01. Objective
 
-This follows standard industry practices for machine learning projects and ensures repository portability.
+The objective of Milestone-4 is to integrate the trained machine learning models into a complete application and deploy it as a working, real-time web system.
+
+## 02. System Overview
+
+The AI Powered Smart Email Classifier is a lightweight enterprise-oriented application that automatically:
+
+* Classifies incoming emails into predefined categories
+
+* Detects the urgency level of each email
+
+* Provides predictions through a user-friendly web interface
+
+    **The system is designed with a strong emphasis on *deployment feasibility*, *low memory usage*, and *real-world usability*.**
+
+## 03. Deployment Architecture
+
+### 3.1 Model Hosting
+
+* Trained machine learning models are hosted on Hugging Face Model Hub
+
+* This avoids storing large model files inside the application repository
+
+* Enables dynamic model loading during runtime
+
+### 3.2 Application Layer
+
+* Built using Streamlit
+
+* Provides a web-based interface for user interaction
+
+* Handles model inference and result presentation
+
+### 3.3 Deployment Platform
+
+* Deployed on Render (Cloud Platform)
+
+* Configured to run on a free-tier instance
+
+* Optimized to avoid memory limit issues
+
+## 04. Models Used in Deployment
+### 4.1 Email Category Classification
+
+**Model:** Logistic Regression
+
+**Feature Extraction:** TF-IDF
+
+**Categories:**
+
+* Complaint
+
+* Feedback
+
+* Request
+
+* Other
+
+* Spam
+
+**Reason for Selection:**
+
+* Low memory footprint
+
+* Fast inference
+
+* High interpretability
+
+* Stable performance in production environments
+
+### 4.2 Email Urgency Detection
+
+**Model:** Logistic Regression
+
+**Urgency Levels:**
+
+* Low
+
+* Medium
+
+* High
+
+#### Fallback Mechanism:
+
+* Rule-based logic is applied when model confidence is low
+
+* Ensures robustness in edge cases
+
+## 05. Integration Process
+
+The integration process involved:
+
+* Removing local dependencies on trained model files
+
+* Uploading trained models to Hugging Face Model Hub
+
+* Dynamically downloading models at runtime using huggingface_hub
+
+* Caching models using Streamlit’s resource caching to improve performance
+
+* Combining ML predictions with rule-based logic for reliability
+
+## 06. User Interface
+
+The Streamlit interface allows users to:
+
+* Enter raw email content
+
+* Trigger classification with a single click
+
+* View predicted email category and urgency level
+
+* Observe confidence scores for predictions
+
+The interface is minimal, responsive, and suitable for real-time usage.
+
+## 07. Deployment Challenges
+
+**Challenge 1: Memory Limit Issues**
+
+Transformer-based models caused memory overflows on free cloud tiers
+
+*Solution:*
+
+Replaced heavy transformer models with Logistic Regression, significantly reducing memory usage.
+
+**Challenge 2: File Path and OS Compatibility Issues**
+
+Local file paths caused failures during cloud deployment
+
+*Solution:*
+
+Adopted Hugging Face Hub for centralized model hosting, eliminating path dependency issues.
+
+## 08. Final Deployment Outcome
+
+* The application was successfully deployed on Render
+
+* The system runs reliably within free-tier memory limits
+
+* Real-time predictions are generated without errors
+
+* The deployed system is accessible through a public URL
+
+## 09. Key Learnings
+
+* Model selection must consider deployment constraints, not just accuracy
+
+* Lightweight models are often more suitable for production environments
+
+* Separating model storage from application code improves scalability
+
+* Hybrid ML + rule-based systems enhance robustness
+
+---
+
+# Note
+
+The deployment has been done using the help of another repository since this repository has all the models that are trained, so it has issues related to memory and storage, so deployment haas been alone done using the following repository 
+
+https://github.com/naveen27022005/email-classifier-app
+
+**Deployed Application Link:**  https://email-classifier-app-r51s.onrender.com/
+
+---
+
+# Conclusion
+
+This project successfully demonstrates the end-to-end deployment of an AI-based email classification system. The project integrates machine learning models, cloud deployment, and a real-time web interface into a complete, production-ready solution. The final system is efficient, scalable, and suitable for enterprise use cases.
 
 ---
 
